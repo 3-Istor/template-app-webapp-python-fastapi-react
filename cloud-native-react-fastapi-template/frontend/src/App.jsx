@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 
 function App() {
-  const [message, setMessage] = useState('Chargement...')
+  const [message, setMessage] = useState('Loading...')
   const [error, setError] = useState(null)
 
   useEffect(() => {
     fetch('/api/hello')
       .then(response => {
         if (!response.ok) {
-          throw new Error('Erreur réseau')
+          throw new Error('Network Error')
         }
         return response.json()
       })
@@ -17,7 +17,7 @@ function App() {
       })
       .catch(err => {
         console.error(err)
-        setError('Impossible de contacter le backend FastAPI')
+        setError('Unable to reach the FastAPI backend')
       })
   }, [])
 
@@ -29,11 +29,11 @@ function App() {
       </header>
       
       <main className="card">
-        <h2>Message du Backend :</h2>
+        <h2>Backend Message:</h2>
         {error ? (
           <div className="error-message">
             <p>{error}</p>
-            <small>Vérifiez que le backend tourne sur le port 8000</small>
+            <small>Check that the backend is running on port 8000</small>
           </div>
         ) : (
           <p className="backend-message">{message}</p>
