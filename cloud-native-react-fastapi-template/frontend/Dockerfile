@@ -8,13 +8,13 @@ RUN npm install
 
 COPY . .
 
-# Étape de production
+
 FROM node:20-slim
 
 WORKDIR /app
 
 COPY --from=build /app .
 
-EXPOSE 3000
+EXPOSE 3001
 
 CMD ["npm", "run", "dev"]

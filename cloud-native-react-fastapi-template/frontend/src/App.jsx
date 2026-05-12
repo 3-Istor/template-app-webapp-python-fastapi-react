@@ -5,7 +5,6 @@ function App() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Appel à l'API FastAPI via proxy
     fetch('/api/hello')
       .then(response => {
         if (!response.ok) {
