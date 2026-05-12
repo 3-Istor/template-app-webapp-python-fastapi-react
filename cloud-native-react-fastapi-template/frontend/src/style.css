@@ -1,0 +1,83 @@
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  margin-bottom: 0.2em;
+  background: linear-gradient(45deg, #646cff, #32e0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 1.2rem;
+  margin-top: 0;
+}
+
+.card {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 2em;
+  margin: 2em 0;
+  border: 1px solid #333;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.backend-message {
+  font-size: 1.5rem;
+  color: #646cff;
+  font-weight: bold;
+}
+
+.error-message {
+  color: #ff4747;
+  padding: 1em;
+  background: rgba(255, 71, 71, 0.1);
+  border-radius: 8px;
+}
+
+.footer {
+  margin-top: 4rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  .card {
+    background-color: #f9f9f9;
+    border-color: #ddd;
+  }
+}
