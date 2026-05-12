@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Cloud Native Template API")
 
-# Configuration CORS pour permettre au frontend React (port 3000) d'appeler l'API
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3001"],

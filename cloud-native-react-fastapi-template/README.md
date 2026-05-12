@@ -23,8 +23,8 @@ cloud-native-react-fastapi-template/
 
 1. docker-compose up --build
 3. Accédez à l'application :
-   - **Frontend** : [http://localhost:3001](http://localhost:3001)
-   - **Backend API** : [http://localhost:8080/api/hello](http://localhost:8080/api/hello)
+   - **Frontend** : [http://localhost:3001]
+   - **Backend API** : [http://localhost:8081/]
 
 ## Lancement sans Docker
 
