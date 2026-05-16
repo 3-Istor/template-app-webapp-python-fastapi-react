@@ -3,7 +3,7 @@ version: '3.8'
 services:
   backend:
     build: ./backend
-    image: ghcr.io/3-lstor/template-app-webapp-python-fastapi-react/backend:latest
+    image: ghcr.io/3-Istor/template-app-webapp-python-fastapi-react/backend:latest
     container_name: fastapi-backend
     ports:
       - "8081:8000"
@@ -14,7 +14,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: ghcr.io/3-lstor/template-app-webapp-python-fastapi-react/frontend:latest
+    image: ghcr.io/3-Istor/template-app-webapp-python-fastapi-react/frontend:latest
     container_name: react-frontend
     ports:
       - "3001:3001"
