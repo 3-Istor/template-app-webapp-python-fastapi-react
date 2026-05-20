@@ -81,3 +81,15 @@ body {
     border-color: #ddd;
   }
 }
+
+.db-status {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+  background: rgba(100, 108, 255, 0.08);
+  text-align: left;
+}
+
+.db-status p {
+  margin: 0.25rem 0;
+}

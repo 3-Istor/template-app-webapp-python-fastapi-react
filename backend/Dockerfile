@@ -1,4 +1,3 @@
-# Utilise Python 3.11 slim pour une image légère
 FROM python:3.11-slim
 
 WORKDIR /app

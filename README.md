@@ -1,40 +1,114 @@
 
+## Structure
 
-##  Structure du Projet
 ```text
 cloud-native-react-fastapi-template/
-├── README.md           
-├── docker-compose.yml  
-├── .gitignore          
-├── frontend/           
+├── backend/
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   └── app/
+│       ├── config.py
+│       ├── database.py
+│       ├── main.py
+│       └── test_main.py
+├── frontend/
 │   ├── Dockerfile
 │   ├── package.json
-│   ├── index.html
 │   ├── vite.config.js
-│   └── src/            
-└── backend/            
-    ├── Dockerfile
-    ├── requirements.txt
-    └── app/            
+│   └── src/
+├── docker-compose.yml
+├── .env.example
+└── README.md
 ```
 
+## Configuration DB
 
-##  Lancement avec Docker
+Copier le fichier d'exemple :
 
-1. docker-compose up --build
-3. Accédez à l'application :
-   - **Frontend** : [http://localhost:3001]
-   - **Backend API** : [http://localhost:8081/]
+```bash
+cp .env.example .env
+```
+
+Variables disponibles :
+
+```env
+DB_ENABLED=true
+DB_TYPE=sqlite
+SQLITE_PATH=./app.db
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=app_db
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+### Mode SQLite par défaut
+
+Aucune base externe n'est nécessaire.
+
+```env
+DB_ENABLED=true
+DB_TYPE=sqlite
+SQLITE_PATH=./app.db
+```
+
+Lancer le projet :
+
+```bash
+docker compose up --build
+```
+
+### Mode sans base de données
+
+```env
+DB_ENABLED=false
+```
+
+### Mode PostgreSQL avec Docker
+
+```env
+DB_ENABLED=true
+DB_TYPE=postgres
+DB_HOST=db
+DB_PORT=5432
+DB_NAME=app_db
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+Lancer avec le service PostgreSQL :
+
+```bash
+docker compose --profile postgres up --build
+```
+
+## URLs
+
+- Frontend : http://localhost:3001
+- Backend : http://localhost:8081
+- Statut DB : http://localhost:8081/api/db/status
 
 ## Lancement sans Docker
 
 ### Backend
-1. `cd backend`
-2. `pip install -r requirements.txt`
-3. `python app/main.py` (ou `uvicorn app.main:app --reload`)
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
 ### Frontend
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
 
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Tests
+
+```bash
+cd backend
+pytest
+```
