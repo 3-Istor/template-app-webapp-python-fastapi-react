@@ -1,0 +1,27 @@
+# deploy/values-frontend.yaml
+replicaCount: 1
+
+image:
+  # Points to the frontend Docker image
+  repository: ghcr.io/3-istor/template-app-webapp-python-fastapi-react/frontend
+  tag: "latest"
+
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80 # Nginx/Vite inside Docker usually serves on 80 or 3000
+      targetPort: 3000
+
+# The frontend is static and does not need Vault secrets
+secrets:
+  enabled: false
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "64Mi"
+  limits:
+    cpu: "200m"
+    memory: "128Mi"

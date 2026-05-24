@@ -1,0 +1,28 @@
+# deploy/values-backend.yaml
+replicaCount: 1
+
+image:
+  # Points to the backend Docker image
+  repository: ghcr.io/3-istor/template-app-webapp-python-fastapi-react/backend
+  tag: "latest"
+
+service:
+  enabled: true
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+
+# The backend connects to the DB and needs Vault secrets
+secrets:
+  enabled: true
+  vaultPath: "kvv2/projects/sandbox/app-fastapi-react"
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
