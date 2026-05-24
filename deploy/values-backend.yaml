@@ -19,6 +19,9 @@ secrets:
   enabled: true
   vaultPath: "kvv2/projects/sandbox/app-fastapi-react"
 
+imagePullSecrets:
+  - name: app-registry
+
 resources:
   requests:
     cpu: "100m"

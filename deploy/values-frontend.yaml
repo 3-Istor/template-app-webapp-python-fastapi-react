@@ -18,6 +18,9 @@ service:
 secrets:
   enabled: false
 
+imagePullSecrets:
+  - name: app-registry
+
 resources:
   requests:
     cpu: "50m"
