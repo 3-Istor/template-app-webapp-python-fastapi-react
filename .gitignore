@@ -1,24 +1,7 @@
-# Node
+.env
+__pycache__/
+.pytest_cache/
 node_modules/
 dist/
-.env
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
-.venv/
-env/
-.env
-
-# Docker
-.dockerignore
-
-# IDE
-.vscode/
-.idea/
-
-# OS
+*.pyc
 .DS_Store
-Thumbs.db
