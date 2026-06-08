@@ -1,114 +1,52 @@
+# vfcnpdemoapp — RoomPulse Store
 
-## Structure
+A clean demo ecommerce app built with FastAPI, React, PostgreSQL, Docker Compose, and Docker secrets.
 
-```text
-cloud-native-react-fastapi-template/
-├── backend/
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   └── app/
-│       ├── config.py
-│       ├── database.py
-│       ├── main.py
-│       └── test_main.py
-├── frontend/
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
-├── docker-compose.yml
-├── .env.example
-└── README.md
-```
+The store sells **RoomPulse**, an IoT device for smart meeting rooms. The demo shows a real checkout flow: React sends a secret-protected order request to FastAPI, FastAPI validates the Docker secret, then saves the order and updates stock in PostgreSQL.
 
-## Configuration DB
+## Services shown
 
-Copier le fichier d'exemple :
+- **Frontend:** React + Vite storefront on port `3001`
+- **Backend:** FastAPI API on port `8081`
+- **Database:** PostgreSQL 16 in Docker
+- **Secrets:** Docker Compose secrets sourced from `.env`
 
-```bash
-cp .env.example .env
-```
+## Environment files
 
-Variables disponibles :
+`.env` contains local demo values and is used by Docker Compose.
+
+`.env.example` contains the same keys with safe placeholder values.
+
+Important keys:
 
 ```env
-DB_ENABLED=true
-DB_TYPE=sqlite
-SQLITE_PATH=./app.db
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=app_db
-DB_USER=postgres
-DB_PASSWORD=postgres
+API_SECRET_KEY=dev-local-secret-change-me
+VITE_DEMO_SECRET=dev-local-secret-change-me
+POSTGRES_PASSWORD=roompulse_password
 ```
 
-### Mode SQLite par défaut
+`API_SECRET_KEY` is mounted into the backend as a Docker secret.
 
-Aucune base externe n'est nécessaire.
+`POSTGRES_PASSWORD` is mounted into PostgreSQL and the backend as a Docker secret.
 
-```env
-DB_ENABLED=true
-DB_TYPE=sqlite
-SQLITE_PATH=./app.db
-```
+`VITE_DEMO_SECRET` is injected into the React app so the checkout form starts with the correct demo secret.
 
-Lancer le projet :
+## Run
 
 ```bash
+docker compose down -v
 docker compose up --build
 ```
 
-### Mode sans base de données
+Open:
 
-```env
-DB_ENABLED=false
-```
+- Frontend: http://localhost:3001
+- Backend: http://localhost:8081/api/status
 
-### Mode PostgreSQL avec Docker
+## Demo flow
 
-```env
-DB_ENABLED=true
-DB_TYPE=postgres
-DB_HOST=db
-DB_PORT=5432
-DB_NAME=app_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-```
-
-Lancer avec le service PostgreSQL :
-
-```bash
-docker compose --profile postgres up --build
-```
-
-## URLs
-
-- Frontend : http://localhost:3001
-- Backend : http://localhost:8081
-- Statut DB : http://localhost:8081/api/db/status
-
-## Lancement sans Docker
-
-### Backend
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Tests
-
-```bash
-cd backend
-pytest
-```
+1. Open the storefront.
+2. Check the service panel: PostgreSQL should show connected and Docker secret should show loaded.
+3. Place an order using the prefilled demo secret.
+4. The order is saved in PostgreSQL and appears in recent orders.
+5. Product stock decreases after checkout.

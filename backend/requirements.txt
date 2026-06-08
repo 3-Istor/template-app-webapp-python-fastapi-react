@@ -5,3 +5,4 @@ httpx==0.25.1
 SQLAlchemy==2.0.41
 psycopg[binary]==3.2.13
 pydantic-settings==2.2.1
+email-validator==2.1.1

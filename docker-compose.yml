@@ -1,48 +1,66 @@
+name: vfcnpdemoapp
+
 services:
   backend:
     build: ./backend
-    image: ghcr.io/3-istor/template-app-webapp-python-fastapi-react/backend:latest
-    container_name: fastapi-backend
+    image: vfcnpdemoapp/backend:latest
+    container_name: vfcnpdemoapp-backend
     ports:
       - "8081:8000"
     volumes:
       - ./backend:/app
     env_file:
-      - path: .env
-        required: false
+      - .env
     environment:
       PYTHONUNBUFFERED: 1
+      API_SECRET_KEY_FILE: /run/secrets/api_secret_key
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - api_secret_key
+      - postgres_password
+    depends_on:
+      db:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
-    image: ghcr.io/3-istor/template-app-webapp-python-fastapi-react/frontend:latest
-    container_name: react-frontend
+    image: vfcnpdemoapp/frontend:latest
+    container_name: vfcnpdemoapp-frontend
     ports:
       - "3001:3001"
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      VITE_DEMO_SECRET: ${VITE_DEMO_SECRET}
     depends_on:
       - backend
 
   db:
     image: postgres:16-alpine
-    container_name: postgres-db
-    profiles:
-      - postgres
+    container_name: vfcnpdemoapp-postgres
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ${DB_NAME:-app_db}
-      POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-roompulse_store}
+      POSTGRES_USER: ${POSTGRES_USER:-roompulse}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - roompulse_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-app_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-roompulse} -d ${POSTGRES_DB:-roompulse_store}"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+secrets:
+  api_secret_key:
+    environment: API_SECRET_KEY
+  postgres_password:
+    environment: POSTGRES_PASSWORD
 
 volumes:
-  postgres_data:
+  roompulse_postgres_data:
+    name: vfcnpdemoapp_postgres_data
