@@ -24,3 +24,8 @@ def test_database_status():
     assert "enabled" in data
     assert "type" in data
     assert "connected" in data
+
+def test_health_check():
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "healthy"}
