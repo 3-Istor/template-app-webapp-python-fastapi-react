@@ -24,6 +24,7 @@ async def root():
         "endpoints": {
             "hello": "/api/hello",
             "database": "/api/db/status",
+            "health": "/health",
         },
     }
 
@@ -42,6 +43,9 @@ async def database_status():
         "connected": check_database_connection() if enabled else False,
     }
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 if __name__ == "__main__":
     import uvicorn
