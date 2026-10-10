@@ -10,8 +10,11 @@ COPY . .
 FROM node:26-slim
 
 WORKDIR /app
+RUN chown node:node /app
 
-COPY --from=build /app .
+COPY --from=build --chown=node:node /app .
+
+USER 1000:1000
 
 EXPOSE 3001
 

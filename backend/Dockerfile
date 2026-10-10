@@ -3,9 +3,13 @@ FROM python:3.14-slim
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && chown 1000:1000 /app
 
-COPY . .
+COPY --chown=1000:1000 . .
+
+# 1000 matches the usual host uid, so the docker-compose bind mount stays
+# writable for the SQLite fallback.
+USER 1000:1000
 
 EXPOSE 8000
 
