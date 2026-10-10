@@ -14,7 +14,12 @@ services:
       PYTHONUNBUFFERED: 1
 
   frontend:
-    build: ./frontend
+    # Local dev runs the vite dev server for hot reload; the image itself
+    # serves the static build with nginx.
+    build:
+      context: ./frontend
+      target: build
+    command: ["npm", "run", "dev"]
     image: ghcr.io/3-istor/template-app-webapp-python-fastapi-react/frontend:latest
     container_name: react-frontend
     ports:
