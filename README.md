@@ -1,28 +1,45 @@
-# Template FastAPI + React
+# template-app-webapp-python-fastapi-react
 
-Template de démarrage pour une application web moderne basée sur FastAPI côté backend et React + Vite côté frontend.
+## Rôle
 
-Le backend est actuellement volontairement minimaliste pour servir de base propre à des évolutions futures. Il utilise :
+Modèle de dépôt applicatif fullstack : backend FastAPI et frontend React/Vite, configurations locales, conteneurs et valeurs de déploiement distinctes pour les deux composants.
 
-- Python 3.11 dans l’image Docker du backend
-- FastAPI 0.104.1
-- Uvicorn pour le serveur ASGI
-- SQLAlchemy 2.x pour la couche d’accès aux données
-- Pydantic Settings pour la configuration par variables d’environnement
+## Technologies
+
+Python, FastAPI, Uvicorn, SQLAlchemy et Pydantic Settings ; JavaScript/JSX, React 19, Vite, Docker/Compose, YAML Helm et GitHub Actions. Les Dockerfiles utilisent Python 3.14 et Node.js 26.
+
+## Entrées
+
+| Origine / destinataire | Contenu et transmission |
+| --- | --- |
+| CMP / app-templates | Sélection comme template GitHub ; lors du provisioning, `k3s-gitops-app` écrit les valeurs du projet dans la copie créée. |
+| Développeurs / environnement applicatif | Code métier, variables d’environnement et base SQLite/PostgreSQL facultative. |
+
+## Sorties et consommateurs
+
+| Origine / destinataire | Contenu et transmission |
+| --- | --- |
+| Dépôts applicatifs / développeurs | Sources backend/frontend, Dockerfiles, CI et configurations copiés par GitHub lors de la création du dépôt. |
+| GHCR / cluster cible | Deux images, `<owner>/<repo>/frontend` et `<owner>/<repo>/backend`, construites par la CI du dépôt. |
+| K3s / Argo CD / infra-templates | `deploy/values-frontend.yaml` et `deploy/values-backend.yaml` de la copie applicative, utilisés pour rendre le chart générique. |
+
+## Documentation CNP
+
+[Fiche `template-app-webapp-python-fastapi-react` et workflows inter-repo](https://github.com/3-Istor/cnp-docs/blob/main/docs/04-templates/00-github-repositories-landscape.md#template-app-webapp-python-fastapi-react).
 
 ## Installation & Démarrage
 
 ### Prérequis
 
 - Python 3.11 ou supérieur
-- Node.js 18+ si vous démarrez aussi le frontend
+- Node.js compatible avec la version de Vite du `frontend/package.json` (le Dockerfile utilise Node.js 26)
 - pip et virtualenv/venv
 
 ### Backend en local
 
 ```bash
 cd backend
-python3.11 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
