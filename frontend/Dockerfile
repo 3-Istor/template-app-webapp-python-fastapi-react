@@ -6,13 +6,18 @@ COPY package.json .
 RUN npm install
 
 COPY . .
+RUN npm run build
 
-FROM node:26-slim
+FROM nginxinc/nginx-unprivileged:1.31.4-alpine
 
-WORKDIR /app
+# The image renders /etc/nginx/templates/*.template with envsubst at start,
+# substituting only variables that are set, so nginx's own $uri survives.
+ENV BACKEND_HOST=http://backend:8000
 
-COPY --from=build /app .
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Restated from the base image so the Dockerfile scan sees a non-root user.
+USER 101
 
 EXPOSE 3001
-
-CMD ["npm", "run", "dev"]
