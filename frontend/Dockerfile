@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:1.31.4-alpine
+FROM nginxinc/nginx-unprivileged:1.31.5-alpine
 
 # The image renders /etc/nginx/templates/*.template with envsubst at start,
 # substituting only variables that are set, so nginx's own $uri survives.
