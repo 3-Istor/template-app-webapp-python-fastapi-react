@@ -83,6 +83,42 @@ Pour PostgreSQL avec Docker, activez le profil dédié :
 docker compose --profile postgres up --build
 ```
 
+### Migrations de base de données
+
+Le schéma est géré par [Alembic](https://alembic.sqlalchemy.org/), selon le standard de migration CNP v1. `docker compose up` applique les migrations avant de démarrer le backend, comme la plateforme le fait avant chaque release.
+
+| Règle | Concrètement |
+|---|---|
+| M-1 | Les migrations sont des fichiers versionnés dans `backend/migrations/versions/`. |
+| M-2 | Aucune modification de schéma au démarrage : pas de `Base.metadata.create_all()`. |
+| M-3 | Un seul point d'entrée, `backend/migrate`, idempotent : relancé sans rien à faire, il sort en 0. |
+| M-4 | En prod, seule la plateforme lance les migrations, dans un Job exécuté après une sauvegarde de la base. |
+| M-5 | **Toute migration de la release N fonctionne avec le code de la release N-1**, qui tourne encore pendant le déploiement. |
+| M-6 | Pas de migration descendante en prod : on corrige avec une nouvelle migration. |
+| M-7 | Pas de traitement de données lourd dans une migration (limite de 4 min). Les backfills se font dans le code, par lots. |
+
+Ce qui passe en une release et ce qui se découpe :
+
+| Opération | Releases | Comment |
+|---|---|---|
+| Ajouter une table, une colonne nullable ou avec défaut | 1 | Direct. |
+| Ajouter un index | 1 | `postgresql_concurrently=True` dans `op.get_context().autocommit_block()`. |
+| Rendre une colonne obligatoire | 2 | N : le code écrit toujours la valeur, backfill. N+1 : `nullable=False`. |
+| Supprimer une colonne ou une table | 2 | N : le code ne la lit plus. N+1 : `drop_column`. |
+| Renommer ou changer le type d'une colonne | 3 | N : nouvelle colonne, écriture dans les deux, backfill. N+1 : lecture de la nouvelle. N+2 : suppression de l'ancienne. |
+
+Au quotidien :
+
+1. Modifier les modèles dans `backend/app/models.py`.
+2. `make migration name="add email_verified"` génère la révision avec `alembic revision --autogenerate`.
+3. Relire le fichier généré. L'autogenerate prend un renommage pour une suppression suivie d'un ajout.
+4. `docker compose up` applique la migration en local.
+5. Ouvrir la PR. La CI vérifie la règle M-5 avec [squawk](https://squawkhq.com/) sur le SQL PostgreSQL de chaque nouvelle révision.
+
+La révision qui termine un découpage, par exemple le `drop_column` de la release N+1, le déclare dans son fichier : `squawk_ignore = ["ban-drop-column"]`. Une migration qui casse vraiment la version en cours demande le label de PR `migration:breaking`, puis la validation d'un admin du projet au moment de la release.
+
+Pour lancer une release, poser un tag `vX.Y.Z` sur main. La CI publie les images avec le tag `X.Y.Z`.
+
 ## Structure du projet
 
 Structure actuelle du dépôt :
@@ -92,12 +128,22 @@ template-app-webapp-python-fastapi-react/
 ├── backend/
 │   ├── Dockerfile
 │   ├── requirements.txt
+│   ├── alembic.ini
+│   ├── migrate                   # point d'entrée des migrations
+│   ├── .squawk.toml              # règles du lint de migration
+│   ├── migrations/
+│   │   ├── env.py
+│   │   └── versions/
+│   ├── scripts/
+│   │   └── lint_migrations.py
 │   └── app/
 │       ├── __init__.py
 │       ├── config.py
 │       ├── database.py
+│       ├── models.py
 │       ├── main.py
-│       └── test_main.py
+│       ├── test_main.py
+│       └── test_migrations.py
 ├── deploy/
 │   ├── values-backend.yaml
 │   └── values-frontend.yaml
@@ -111,6 +157,7 @@ template-app-webapp-python-fastapi-react/
 │       ├── main.jsx
 │       └── style.css
 ├── docker-compose.yml
+├── Makefile
 └── README.md
 ```
 
