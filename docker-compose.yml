@@ -12,6 +12,24 @@ services:
         required: false
     environment:
       PYTHONUNBUFFERED: 1
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  # Same command the platform runs as a PreSync Job before each release.
+  migrate:
+    build: ./backend
+    image: ghcr.io/3-istor/template-app-webapp-python-fastapi-react/backend:latest
+    command: ["/app/migrate"]
+    volumes:
+      - ./backend:/app
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      db:
+        condition: service_healthy
+        required: false
 
   frontend:
     # Local dev runs the vite dev server for hot reload; the image itself

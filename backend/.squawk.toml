@@ -1,0 +1,16 @@
+# Lint for rule M-5 (migration N must work with code N-1), not for style.
+# Alembic records applied revisions and runs each one in its own transaction,
+# so prefer-robust-stmts adds nothing. Lock and statement timeouts are set on
+# the migration connection in migrations/env.py, which the offline SQL that
+# squawk reads cannot show.
+excluded_rules = [
+    "prefer-robust-stmts",
+    "prefer-bigint-over-int",
+    "prefer-bigint-over-smallint",
+    "prefer-identity",
+    "prefer-text-field",
+    "prefer-timestamp-tz",
+    "require-lock-timeout",
+    "require-statement-timeout",
+    "require-timeout-settings",
+]
