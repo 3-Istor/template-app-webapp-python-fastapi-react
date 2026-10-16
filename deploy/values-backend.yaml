@@ -27,6 +27,12 @@ db:
   name: "app_fastapi_react"
   storage: "1Gi"
 
+# The platform runs backend/migrate (alembic upgrade head) as a Job once the
+# database is Ready and before each new version starts.
+migrations:
+  enabled: true
+  command: ["/app/migrate"]
+
 resources:
   requests:
     cpu: "100m"
