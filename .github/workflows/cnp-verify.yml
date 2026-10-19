@@ -1,0 +1,58 @@
+# A verification suite of kind "external": the CMP starts this workflow against
+# an environment (staging before a promotion) and waits for the result it posts
+# back. Name the suite after this file in the app's promotion settings.
+#
+# Replace the "Run the tests" step with your own end-to-end tests. The target
+# is protected by SSO like any CNP app: tests that need a logged-in user must
+# authenticate themselves.
+name: CNP verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: Base URL of the environment under test
+        required: true
+      version:
+        description: Version running there
+        required: true
+      callback_url:
+        description: Where to post the result (set by the CMP)
+        required: true
+      callback_token:
+        description: One-time token for that post (set by the CMP)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run the tests
+        id: tests
+        env:
+          TARGET_URL: ${{ inputs.target_url }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$TARGET_URL")
+          echo "GET $TARGET_URL -> $code"
+          # 302 is the SSO login redirect: the app answered.
+          [[ "$code" =~ ^(2..|302)$ ]]
+
+      - name: Report to the CMP
+        if: always()
+        env:
+          CALLBACK_URL: ${{ inputs.callback_url }}
+          CALLBACK_TOKEN: ${{ inputs.callback_token }}
+          OUTCOME: ${{ steps.tests.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          passed=$([ "$OUTCOME" = "success" ] && echo true || echo false)
+          curl -sf -X POST "$CALLBACK_URL" \
+            -H "Authorization: Bearer $CALLBACK_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"passed\": $passed, \"summary\": \"tests $OUTCOME\", \"detailsUrl\": \"$RUN_URL\"}"

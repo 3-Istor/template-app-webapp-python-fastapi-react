@@ -129,6 +129,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Refuse to overwrite a released version
+        # A version is built once: staging runs it, then the CMP promotes that
+        # exact image to prod. Rebuilding under the same tag would put an
+        # image nobody tested behind a name that was.
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          image="${REGISTRY}/${IMAGE_NAME,,}/${{ matrix.component }}:${GITHUB_REF_NAME#v}"
+          if docker buildx imagetools inspect "$image" >/dev/null 2>&1; then
+            echo "::error::$image already exists. Push a new tag (the next -rc.N) instead of moving this one."
+            exit 1
+          fi
+
       - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v6
@@ -138,7 +150,7 @@ jobs:
             type=ref,event=branch
             type=sha,prefix=sha-
             type=semver,pattern={{version}}
-            type=raw,value=latest
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Component image
         uses: docker/build-push-action@v7
