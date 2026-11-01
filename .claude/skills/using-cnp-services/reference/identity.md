@@ -8,8 +8,9 @@ In any other exposure, no identity reaches the backend.
 
 Verify the token in the backend anyway. Every pod of the project, and a few
 platform namespaces, can reach the backend Service without going through the
-gateway, so a header on its own proves nothing. The issuer is `https://auth.3istor.com/realms/<project>`; a project
-with its own Keycloak uses `https://auth-<project>.3istor.com/realms/<realm>`.
+gateway, so a header on its own proves nothing. The issuer is `https://auth.3istor.com/realms/<project>`, where
+`<project>` is `project_name` in `deploy/values-backend.yaml`. A project with
+its own Keycloak uses `https://auth-<project>.3istor.com/realms/<realm>`.
 
 1. Pin `PyJWT[crypto]` in `backend/requirements.txt`.
 2. Add `oidc_issuer: str = ""` to `Settings`, and set `OIDC_ISSUER` under `env:`
@@ -63,6 +64,8 @@ def require_group(group: str):
    address and username can change.
 5. In tests, override the dependency instead of minting tokens:
    `app.dependency_overrides[current_user] = lambda: {"sub": "u1", "groups": ["project-members"]}`.
+   `docker compose` runs without the gateway, so signed-in routes answer 401
+   locally. The tests cover them, and staging checks the real login.
 
 Useful claims: `sub`, `preferred_username`, `email`, `name`, and `groups`
 (`project-members`, `project-admins`). Group names come without a leading

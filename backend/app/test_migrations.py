@@ -3,10 +3,15 @@ from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 from app.config import get_settings
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+
+
+def head_revision() -> str:
+    return ScriptDirectory.from_config(Config(str(BACKEND_DIR / "alembic.ini"))).get_current_head()
 
 
 def upgrade_to_head(db_path: Path, monkeypatch) -> None:
@@ -29,7 +34,7 @@ def test_migrations_reach_head_on_an_empty_database(tmp_path, monkeypatch):
 
     upgrade_to_head(db_path, monkeypatch)
 
-    assert applied_revision(db_path) == "0001"
+    assert applied_revision(db_path) == head_revision()
 
 
 def test_migrations_are_idempotent_when_rerun(tmp_path, monkeypatch):
@@ -38,4 +43,4 @@ def test_migrations_are_idempotent_when_rerun(tmp_path, monkeypatch):
 
     upgrade_to_head(db_path, monkeypatch)
 
-    assert applied_revision(db_path) == "0001"
+    assert applied_revision(db_path) == head_revision()

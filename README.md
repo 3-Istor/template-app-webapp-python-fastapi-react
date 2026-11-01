@@ -95,7 +95,7 @@ Le schéma est géré par [Alembic](https://alembic.sqlalchemy.org/), selon le s
 | M-4 | En prod, seule la plateforme lance les migrations, dans un Job exécuté après une sauvegarde de la base. |
 | M-5 | **Toute migration de la release N fonctionne avec le code de la release N-1**, qui tourne encore pendant le déploiement. |
 | M-6 | Pas de migration descendante en prod : on corrige avec une nouvelle migration. |
-| M-7 | Pas de traitement de données lourd dans une migration (limite de 4 min). Les backfills se font dans le code, par lots. |
+| M-7 | Pas de traitement de données lourd dans une migration (le Job est arrêté après `migrations.timeout`, 5 min par défaut). Les backfills se font dans le code, par lots. |
 
 Ce qui passe en une release et ce qui se découpe :
 
