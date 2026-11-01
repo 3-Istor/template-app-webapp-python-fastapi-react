@@ -95,7 +95,7 @@ Le schéma est géré par [Alembic](https://alembic.sqlalchemy.org/), selon le s
 | M-4 | En prod, seule la plateforme lance les migrations, dans un Job exécuté après une sauvegarde de la base. |
 | M-5 | **Toute migration de la release N fonctionne avec le code de la release N-1**, qui tourne encore pendant le déploiement. |
 | M-6 | Pas de migration descendante en prod : on corrige avec une nouvelle migration. |
-| M-7 | Pas de traitement de données lourd dans une migration (limite de 4 min). Les backfills se font dans le code, par lots. |
+| M-7 | Pas de traitement de données lourd dans une migration (le Job est arrêté après `migrations.timeout`, 5 min par défaut). Les backfills se font dans le code, par lots. |
 
 Ce qui passe en une release et ce qui se découpe :
 
@@ -197,6 +197,14 @@ pytest
 
 ## 🤖 Tu travailles avec une IA ?
 
-Oui. Un fichier de contexte dédié existe pour guider un LLM ou un assistant de code : [ai-context.md](ai-context.md).
+Le dépôt contient un harnais d'agent : l'agent trouve seul les commandes, les conventions et l'usage des services de la plateforme, sans qu'on ait à les lui rappeler.
 
-Ce fichier explique comment ajouter une route, une entité, des schémas, des dépendances ou des validations sans casser les conventions du template. Si vous modifiez le backend avec une IA, faites lire ce fichier en premier.
+| Fichier | Rôle |
+|---|---|
+| [AGENTS.md](AGENTS.md) | Lu par tous les agents (Claude Code, Codex, Cursor, Copilot) à chaque session : commandes, contrat avec la plateforme, conventions, pièges. À compléter avec ce que fait l'app. |
+| [CLAUDE.md](CLAUDE.md) | Importe `AGENTS.md` et ajoute les consignes propres à Claude Code. |
+| `.claude/skills/using-cnp-services/` | Base de données, sauvegardes, secrets, SSO et utilisateur connecté, releases, logs, mise en veille. Chargée quand la tâche les concerne. |
+| `.claude/rules/migrations.md` | Règles de migration, chargées quand l'agent touche les modèles ou les migrations. |
+| `.claude/settings.json` | Ce qui doit tenir à chaque fois : lecture des `.env` interdite, confirmation avant d'éditer les fichiers gérés par la plateforme, plugin `cnp` (MCP de la CMP et guides de la plateforme). |
+
+Vérification : `make install` une fois, puis `make check`. Une erreur qu'un agent fait deux fois s'ajoute dans la section « Gotchas » d'`AGENTS.md`, ou devient une règle de `.claude/settings.json` si elle ne souffre aucune exception.
