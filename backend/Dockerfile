@@ -3,7 +3,11 @@ FROM python:3.14-slim
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && chown 1000:1000 /app
+# pip is unused at runtime and its vendored urllib3/msgpack carry CVEs: add
+# packages to requirements.txt and rebuild instead.
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip uninstall -y pip \
+    && chown 1000:1000 /app
 
 COPY --chown=1000:1000 . .
 

@@ -49,3 +49,26 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy.sarif
+
+  # The fs scan misses base image layers. Generated apps replace this file with
+  # app-templates' security.yml, so this job only guards the template itself.
+  image:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t "scan/${{ matrix.component }}" "./${{ matrix.component }}"
+
+      - name: Block fixable HIGH and CRITICAL vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: scan/${{ matrix.component }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
