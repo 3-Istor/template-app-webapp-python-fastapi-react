@@ -23,7 +23,7 @@ ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# The base image's non-root user.
+# Back to the base image's non-root user after apk upgrade.
 USER 101
 
 EXPOSE 3001

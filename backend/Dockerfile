@@ -3,7 +3,7 @@ FROM python:3.14-slim
 WORKDIR /app
 
 COPY requirements.txt .
-# pip is unused at runtime and its vendored urllib3/msgpack carry CVEs: add
+# pip is unused at runtime and its vendored dependencies carry CVEs: add
 # packages to requirements.txt and rebuild instead.
 RUN pip install --no-cache-dir -r requirements.txt \
     && pip uninstall -y pip \
