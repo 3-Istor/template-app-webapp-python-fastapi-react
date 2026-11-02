@@ -94,5 +94,6 @@ canary and verification suites, see [reference/releases.md](reference/releases.m
 Every push runs secret scanning (gitleaks) and Trivy on the dependencies, the
 Dockerfiles and the built images. Alerts go to the project's Discord when it
 has one. The CMP sets whether findings block CI (`deploy/security.yaml`).
-Dependabot opens weekly update PRs and auto-merges patch and minor bumps,
-except for packages still on 0.x.
+Dependabot checks every day and proposes a version once it is 7 days old. The
+`dependabot-merge` job in CI merges patch and minor bumps after the tests pass;
+major bumps wait for a person.

@@ -11,9 +11,12 @@ on:
 permissions:
   contents: read
 
+# Scans of the template itself. A generated app replaces this file with
+# app-templates' security.yml, after one run on its first commit.
 jobs:
   trivy:
     runs-on: ubuntu-latest
+    if: github.repository == '3-Istor/template-app-webapp-python-fastapi-react'
     permissions:
       contents: read
       security-events: write
@@ -54,6 +57,7 @@ jobs:
   # app-templates' security.yml, so this job only guards the template itself.
   image:
     runs-on: ubuntu-latest
+    if: github.repository == '3-Istor/template-app-webapp-python-fastapi-react'
     strategy:
       fail-fast: false
       matrix:
