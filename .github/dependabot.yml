@@ -57,6 +57,12 @@ updates:
     labels:
       - "dependencies"
       - "github-actions"
+    # One PR for all action bumps: GITHUB_TOKEN cannot merge a second PR that edits
+    # a workflow once main has changed it. Majors stay separate, for a human.
+    groups:
+      github-actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "docker"
     directory: "/backend"
