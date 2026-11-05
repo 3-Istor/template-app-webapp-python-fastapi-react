@@ -69,8 +69,8 @@ code does with it, and where it is switched on or off.
 ## Releases, staging and canary
 
 With staging, a release is a candidate tag `vX.Y.Z-rc.N` on `main`, promoted to
-prod from the CMP; without staging it is `vX.Y.Z`. CI publishes `backend:X.Y.Z`
-and `frontend:X.Y.Z`, and the platform rolls them out. Cut it with the CMP "New
+prod from the CMP; without staging it is `vX.Y.Z`. CI publishes both images
+under the tag's version, and the platform rolls them out. Cut it with the CMP "New
 release" button or `cut_release`, not by hand. Tags, staging, promotion, canary
 and verification suites: [reference/releases.md](reference/releases.md).
 
