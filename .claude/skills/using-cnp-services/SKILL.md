@@ -51,7 +51,8 @@ code does with it, and where it is switched on or off.
 
 ## SSO and the logged-in user
 
-- Every app sits behind the company login (Keycloak, realm = project name).
+- Every app sits behind the company login (Keycloak, realm = project name;
+  staging has its own realm, `<project>-staging`).
   Who may open it is the app's exposure setting in the CMP. Its four presets
   write `ingress.sso_protected` and `ingress.allowedGroups` in
   `values-frontend.yaml`:
@@ -59,10 +60,10 @@ code does with it, and where it is switched on or off.
   - `project users`: any account in the project realm (the default)
   - `project members`: groups `project-members` and `project-admins`
   - `project admins`: group `project-admins`
-- The backend only learns who the user is with `project members` or
-  `project admins`. With either, the gateway forwards the access token as
-  `Authorization: Bearer <JWT>`. Reading it and checking roles:
-  [reference/identity.md](reference/identity.md).
+- With any of the last three, the gateway forwards the access token to the
+  backend as `Authorization: Bearer <JWT>`; with `public` no identity reaches
+  it. Reading it, the issuer per environment, public paths and customer
+  sign-up with organizations: [reference/identity.md](reference/identity.md).
 - Logout is `/logout` on the app's URL.
 
 ## Releases, staging and canary
