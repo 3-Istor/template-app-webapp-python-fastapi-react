@@ -43,7 +43,11 @@ from app.config import get_settings
 @lru_cache
 def _jwks() -> jwt.PyJWKClient:
     issuer = get_settings().oidc_issuer
-    return jwt.PyJWKClient(f"{issuer}/protocol/openid-connect/certs")
+    # Cloudflare in front of Keycloak answers 403 to urllib's default "Python-urllib" User-Agent.
+    return jwt.PyJWKClient(
+        f"{issuer}/protocol/openid-connect/certs",
+        headers={"User-Agent": "app-backend"},
+    )
 
 
 def current_user(authorization: str = Header(default="")) -> dict:
