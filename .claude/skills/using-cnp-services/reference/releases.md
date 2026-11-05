@@ -2,11 +2,15 @@
 
 ## Cutting a release
 
-- Tag `main` with `vX.Y.Z`, from the CMP Release tab, from the `cnp` tool
-  `cut_release` (`patch`, `minor` or `major`), or with
-  `git tag vX.Y.Z && git push origin vX.Y.Z`.
-- CI builds both images under `X.Y.Z`. If a tag already exists, CI refuses to
-  rebuild it: push the next version (or `-rc.N`) instead of moving the tag.
+- Release from the CMP Release tab ("New release") or with the `cnp` tool
+  `cut_release` (`bump`: `candidate`, `patch`, `minor` or `major`). Both compute
+  the tag and put it on the head of `main`; do not tag by hand.
+- With staging, a release is a candidate `vX.Y.Z-rc.N`. It deploys to staging and
+  is promoted to prod from the CMP, which leaves a `release/X.Y.Z-rc.N` tag:
+  that marks X.Y.Z as promoted, and the next release is a new version. Without
+  staging, the tag is `vX.Y.Z` and goes straight to prod.
+- CI builds both images under the tag's version. If a tag already exists, CI
+  refuses to rebuild it: cut the next candidate instead of moving the tag.
 - Before the new pods start, the platform takes a backup (when backups are on)
   and runs the migration Job. A migration that fails stops the release, and
   the running version stays.
