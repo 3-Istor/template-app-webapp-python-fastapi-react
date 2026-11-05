@@ -119,8 +119,11 @@ The app manages organizations with its own client credentials, never with a
 person's token:
 
 1. `POST <issuer>/protocol/openid-connect/token` with
-   `grant_type=client_credentials`, the client id above and the `client-secret`
-   key of the app's secret. Cache the token until it expires.
+   `grant_type=client_credentials`, the client id and the client secret. The id
+   is `auth.clientId` in the values; the secret is the `client-secret` key of
+   the app's Vault secret, injected into the pod as the environment variable
+   `client-secret` (Kubernetes 1.32 and later accept the hyphen). Cache the
+   token until it expires.
 2. With that token, call the Admin API of the realm
    (`https://auth.3istor.com/admin/realms/<realm>/...`, `<realm>` being the
    last segment of the issuer): `POST /organizations` creates an organization,
