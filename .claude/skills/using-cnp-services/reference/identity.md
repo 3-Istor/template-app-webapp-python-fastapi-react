@@ -82,8 +82,12 @@ def require_group(group: str):
    locally. The tests cover them, and staging checks the real login.
 
 Useful claims: `sub`, `preferred_username`, `email`, `name`, and `groups`
-(`project-members`, `project-admins`; `users` for customers). Group names come
-without a leading slash, as `ingress.allowedGroups` expects them.
+(`project-members`, `project-admins`, and `users`). Group names come without a
+leading slash, as `ingress.allowedGroups` expects them. `users` is the default
+group of the prod realm once customer sign-up has been turned on: Keycloak puts
+every new account in it, developers at their first login and the app's own
+service accounts included. It does not mean "customer"; rely on the
+`organization` claim.
 
 ## Public paths
 
@@ -101,19 +105,23 @@ the endpoint authenticates the caller itself (API key, signature).
 ## Customer sign-up and organizations
 
 Off by default. A project admin turns it on in the CMP (project "..." menu,
-"Customer sign-up"); an assistant cannot (403). When on:
+"Turn on customer sign-up"); an assistant cannot (403). When on:
 
-- The prod realm opens registration. Customers land in group `users`, never in
-  `project-members`. No e-mail is sent: no verification, no invitation. The
+- The prod realm opens registration. Sign-ups land in the default group
+  `users`, never in `project-members`. No e-mail is sent: no verification, no
+  invitation. The
   staging realm never opens registration: create test accounts there in the
   Keycloak console (admin login in Vault, secret `keycloak-tenant-admin-staging`
   of the project's mount) or with the staging app's own client, as below.
-- Organizations are enabled in both realms. Every app client
-  (`cnp-<project>-<app>`, plus `-stg` in staging) gets a service account with
-  `manage-organizations`, `manage-users` and `view-users` of its own realm, and
-  the `organization` scope, so the token carries the `organization` claim (the
-  user's organizations; decode a real token to see its exact shape).
-- Turning it off only closes registration; organizations and accounts stay.
+- Organizations are enabled in both realms. Each app client gets a service
+  account with `manage-organizations` and `manage-users` of its own realm
+  (`manage-users` includes viewing users), and the `organization` scope, so the
+  token carries the `organization` claim (the user's organizations; decode a
+  real token to see its exact shape). The prod client `cnp-<project>-<app>` has
+  these rights in the prod realm only, the staging client
+  `cnp-<project>-<app>-stg` in the staging realm only.
+- Turning it off ("Turn off customer sign-up") only closes registration;
+  organizations and accounts stay.
 
 The app manages organizations with its own client credentials, never with a
 person's token:
@@ -121,9 +129,9 @@ person's token:
 1. `POST <issuer>/protocol/openid-connect/token` with
    `grant_type=client_credentials`, the client id and the client secret. The id
    is `auth.clientId` in the values; the secret is the `client-secret` key of
-   the app's Vault secret, injected into the pod as the environment variable
-   `client-secret` (Kubernetes 1.32 and later accept the hyphen). Cache the
-   token until it expires.
+   the app's Vault secret, injected into the pod by `envFrom` as the environment
+   variable `client-secret` (the platform runs Kubernetes 1.34, which accepts
+   the hyphen). Cache the token until it expires.
 2. With that token, call the Admin API of the realm
    (`https://auth.3istor.com/admin/realms/<realm>/...`, `<realm>` being the
    last segment of the issuer): `POST /organizations` creates an organization,
