@@ -23,7 +23,7 @@ env:
 
 jobs:
   backend-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -35,7 +35,7 @@ jobs:
         run: docker run --rm backend python -m pytest -q
 
   migration-lint:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v7
@@ -82,7 +82,7 @@ jobs:
           exit 1
 
   frontend-build-check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -90,7 +90,7 @@ jobs:
         run: docker build ./frontend
 
   docker-build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     needs: [backend-test, frontend-build-check]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     strategy:
@@ -145,7 +145,7 @@ jobs:
   # Merged by the workflow once the jobs above pass: GitHub auto-merge would need a
   # repo setting and branch protection that generated repos do not have.
   dependabot-merge:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     needs: [backend-test, migration-lint, frontend-build-check]
     if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
     permissions:

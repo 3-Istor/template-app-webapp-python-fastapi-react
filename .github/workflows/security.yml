@@ -15,7 +15,7 @@ permissions:
 # app-templates' security.yml, after one run on its first commit.
 jobs:
   trivy:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     if: github.repository == '3-Istor/template-app-webapp-python-fastapi-react'
     permissions:
       contents: read
@@ -56,7 +56,7 @@ jobs:
   # The fs scan misses base image layers. Generated apps replace this file with
   # app-templates' security.yml, so this job only guards the template itself.
   image:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     if: github.repository == '3-Istor/template-app-webapp-python-fastapi-react'
     strategy:
       fail-fast: false
