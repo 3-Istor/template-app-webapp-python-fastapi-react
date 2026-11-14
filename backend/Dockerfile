@@ -2,6 +2,11 @@ FROM python:3.14-slim
 
 WORKDIR /app
 
+# Debian security fixes reach the base image days after they ship.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 # pip is unused at runtime and its vendored dependencies carry CVEs: add
 # packages to requirements.txt and rebuild instead.
