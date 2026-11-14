@@ -40,3 +40,32 @@ resources:
   limits:
     cpu: "500m"
     memory: "512Mi"
+
+# Same as the deploy/values-backend.yaml app-templates writes for a new app.
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+metrics:
+  enabled: true
+  path: /metrics
+
+tracing:
+  enabled: true
+  sampleRatio: "1.0"

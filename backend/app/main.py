@@ -1,11 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import Counter
 
+from app import telemetry
 from app.config import get_settings
 from app.database import check_database_connection, is_database_enabled
 
+telemetry.configure_logging()
+
 settings = get_settings()
-app = FastAPI(title="Cloud Native Template API")
+app = FastAPI(title="Cloud Native Template API", telemetry=telemetry.configure_tracing())
+telemetry.instrument(app)
+
+# Example business metric, exposed on /metrics as app_greetings_total. Keep
+# label values to a small fixed set: never a user id, a name or a raw path.
+GREETINGS = Counter("app_greetings", "Greetings served by the API.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +40,14 @@ async def root():
 
 @app.get("/api/hello")
 async def say_hello():
+    GREETINGS.inc()
     return {"message": "Hello from FastAPI"}
+
+
+@app.get("/api/hello/{name}")
+async def say_hello_to(name: str):
+    GREETINGS.inc()
+    return {"message": f"Hello {name} from FastAPI"}
 
 
 @app.get("/api/db/status")
