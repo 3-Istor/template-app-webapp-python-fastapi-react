@@ -50,8 +50,11 @@ A CNP app made from the FastAPI + React template: a FastAPI backend, a React
   07:00 Europe/Paris (`offhours` in `deploy/*.yaml`). Files written in a
   container are lost, so keep data in PostgreSQL. Do not rely on in-process
   timers or background loops.
-- Logs go to stdout, one line per event. The platform collects them; read them
-  with the `cnp` tool `get_app_logs` or in the CMP.
+- Logs go to stdout as JSON, one line per event, with the request's
+  `trace_id`. The platform collects them; read them with the `cnp` tool
+  `get_app_logs` or in the CMP. `GET /metrics` (Prometheus) and OpenTelemetry
+  traces are set up in `backend/app/telemetry.py`; see the
+  `using-cnp-services` skill before adding a metric or a log field.
 - Containers run as non-root (backend uid 1000, nginx uid 101), and memory
   requests equal memory limits in `deploy/*.yaml`. Keep both that way.
 

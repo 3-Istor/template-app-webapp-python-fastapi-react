@@ -188,6 +188,16 @@ Une fois le backend démarré, ouvrez :
 
 Si vous passez par Docker Compose, l’API reste accessible via http://localhost:8081/docs et http://localhost:8081/redoc.
 
+## Observabilité
+
+Le backend arrive instrumenté (`backend/app/telemetry.py`) :
+
+- **Logs JSON** sur stdout, une ligne par événement, avec `trace_id` et `span_id` de la requête en cours. Chaque requête produit une ligne `app.request` (méthode, route, statut, durée).
+- **Métriques Prometheus** sur `GET /metrics` : `http_server_request_duration_seconds` par méthode, modèle de route (`/api/hello/{name}`, jamais le chemin brut) et statut, et `app_greetings_total`, exemple de métrique métier à recopier. `/health` et `/metrics` ne sont pas comptés.
+- **Traces OpenTelemetry** : FastAPI, appels httpx et requêtes PostgreSQL, envoyées en OTLP/gRPC à `OTEL_EXPORTER_OTLP_ENDPOINT` (par défaut la passerelle de la plateforme). Échantillonnage parent-based, ratio `OTEL_TRACES_SAMPLER_ARG` (1.0 par défaut). `OTEL_SDK_DISABLED=true` coupe les traces ; en local, Docker Compose met `OTEL_TRACES_EXPORTER=none`.
+
+L'app ne déclare que `service.name` (`OTEL_SERVICE_NAME`) et `service.version` (`APP_VERSION`) : le collecteur ajoute lui-même le projet, le namespace et le pod.
+
 ## Tests
 
 ```bash

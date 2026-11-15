@@ -12,6 +12,8 @@ services:
         required: false
     environment:
       PYTHONUNBUFFERED: 1
+      # No collector locally: spans are not exported, logs still carry trace_id.
+      OTEL_TRACES_EXPORTER: none
     depends_on:
       migrate:
         condition: service_completed_successfully

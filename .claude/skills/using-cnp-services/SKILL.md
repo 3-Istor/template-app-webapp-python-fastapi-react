@@ -82,6 +82,20 @@ and verification suites: [reference/releases.md](reference/releases.md).
   line per event, and never log secrets, tokens or personal data. Read logs
   with the `cnp` tool `get_app_logs` or in the CMP. Retention is 14 days by
   default (`logRetention`: `7d`, `14d` or `30d`).
+- Logs are JSON, one object per line, set up in `backend/app/telemetry.py`.
+  Every line written during a request carries its `trace_id` and `span_id`.
+  Add fields with `logger.info("...", extra={"order_id": order.id})`.
+- `GET /metrics` serves Prometheus metrics: `http_server_request_duration_seconds`
+  by method, route template and status, plus the example business counter
+  `app_greetings_total` in `main.py`. Add your own with `prometheus_client`.
+  Label values come from a small fixed set: never an id, a name or a raw path.
+  The route stays off `/api/`, so browsers cannot reach it.
+- Traces: FastAPI, httpx calls and PostgreSQL queries are traced with
+  OpenTelemetry and sent to the platform collector. The platform sets the
+  `OTEL_*` variables (`metrics.enabled` and `tracing.enabled` in
+  `deploy/values-backend.yaml`). Never set `OTEL_RESOURCE_ATTRIBUTES`: the
+  collector adds the project, namespace and pod itself. `OTEL_SDK_DISABLED=true`
+  turns tracing off.
 
 ## Off-hours
 
