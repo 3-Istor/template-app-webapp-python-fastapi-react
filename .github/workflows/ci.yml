@@ -25,7 +25,7 @@ jobs:
   backend-test:
     runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Tests run inside the image, so a base image bump is tested on the Python that ships.
       - name: Build the backend image
@@ -38,12 +38,12 @@ jobs:
     runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
 
@@ -84,7 +84,7 @@ jobs:
   frontend-build-check:
     runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build the frontend image
         run: docker build ./frontend
@@ -93,15 +93,19 @@ jobs:
     runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
     needs: [backend-test, frontend-build-check]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     strategy:
       matrix:
         component: [frontend, backend]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -121,7 +125,7 @@ jobs:
 
       - name: Extract metadata (tags, labels)
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component }}
           # Without this, metadata-action also tags every non-prerelease semver as latest.
@@ -132,7 +136,8 @@ jobs:
             type=semver,pattern={{version}}
 
       - name: Build and push Component image
-        uses: docker/build-push-action@v7
+        id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ./${{ matrix.component }}
           file: ./${{ matrix.component }}/Dockerfile
@@ -141,6 +146,17 @@ jobs:
           labels: |
             ${{ steps.meta.outputs.labels }}
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+
+      # Keyless: the certificate binds the signature to this workflow and ref
+      # through the GitHub OIDC token, so there is no key to store or rotate.
+      # Admission checks it to refuse images built outside this CI (CNP-299).
+      - name: Sign image
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component }}@${{ steps.build.outputs.digest }}
+        run: cosign sign --yes "${IMAGE,,}"
 
   # Merged by the workflow once the jobs above pass: GitHub auto-merge would need a
   # repo setting and branch protection that generated repos do not have.
@@ -153,7 +169,7 @@ jobs:
       pull-requests: write
     steps:
       - id: metadata
-        uses: dependabot/fetch-metadata@v3.1.0
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
 
       - name: Merge patch and minor updates
         if: >-
