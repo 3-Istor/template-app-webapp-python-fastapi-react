@@ -14,10 +14,13 @@ service:
       port: 8000
       targetPort: 8000
 
-# The backend connects to the DB and needs Vault secrets
+# The backend connects to the DB and needs Vault secrets. The Vault path is
+# the app's own, project-<project>/<app>: the chart derives it.
 secrets:
   enabled: true
-  vaultPath: "kvv2/projects/sandbox/app-fastapi-react"
+  # Names the app expects in that path, never their values: the CMP lists the
+  # missing ones with a link to Vault.
+  keys: []
 
 imagePullSecrets:
   - name: app-registry
