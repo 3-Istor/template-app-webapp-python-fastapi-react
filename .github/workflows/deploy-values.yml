@@ -23,14 +23,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # infra-templates is private: CNP_INFRA_TEMPLATES_TOKEN is an org secret
-      # with read access to its contents only.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: 3-Istor/infra-templates
           ref: main
           path: .cnp/infra-templates
-          token: ${{ secrets.CNP_INFRA_TEMPLATES_TOKEN || github.token }}
           persist-credentials: false
 
       - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
