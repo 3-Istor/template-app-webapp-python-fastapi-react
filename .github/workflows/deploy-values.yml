@@ -1,0 +1,38 @@
+# Renders deploy/ with the platform chart the way Argo CD does, so a value it
+# would refuse fails here first: a key the chart does not know, a value outside
+# its schema, the image of another app, more than the namespace quota.
+# The checks live in infra-templates (ci/check-app-values.sh), so this repo
+# follows the chart Argo CD deploys with. Make it a required check on main:
+# the CMP's changes are commits on main too, and Argo CD refuses the same
+# values at sync.
+name: Deploy values
+
+on:
+  push:
+    branches: [main]
+    paths: ["deploy/**", ".github/workflows/deploy-values.yml"]
+  pull_request:
+    paths: ["deploy/**", ".github/workflows/deploy-values.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ${{ fromJSON(vars.CNP_CI_RUNS_ON || '["self-hosted","Linux","X64"]') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: 3-Istor/infra-templates
+          ref: main
+          path: .cnp/infra-templates
+          persist-credentials: false
+
+      - uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+
+      - name: Check deploy/ against the chart
+        env:
+          APP: ${{ github.event.repository.name }}
+        run: .cnp/infra-templates/ci/check-app-values.sh . "$APP"
