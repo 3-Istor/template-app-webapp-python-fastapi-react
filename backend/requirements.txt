@@ -5,7 +5,7 @@ httpx==0.28.1
 SQLAlchemy==2.1.8
 alembic==1.20.1
 psycopg[binary]==3.3.9
-pydantic-settings==2.16.2
+pydantic-settings==2.16.3
 prometheus-client==0.26.0
 opentelemetry-sdk==1.45.2
 opentelemetry-exporter-otlp-proto-grpc==1.45.2
